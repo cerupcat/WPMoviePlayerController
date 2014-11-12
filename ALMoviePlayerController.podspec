@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
 	s.homepage		= 'https://github.com/cerupcat/ALMoviePlayerController'
 	s.author		= { 'Anthony Lobianco' => 'anthony@lobian.co' }
 	s.license 		= 'MIT'
-	s.platform		= :ios, '5.0'
+	s.platform		= :ios, '7.1'
 	s.requires_arc	= true
 	s.source		= { :git => 'https://github.com/cerupcat/ALMoviePlayerController.git', :tag => s.version.to_s }
 	s.source_files	= 'ALMoviePlayerController/*.{h,m}'
