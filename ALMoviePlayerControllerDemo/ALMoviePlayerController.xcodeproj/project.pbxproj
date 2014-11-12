@@ -31,7 +31,6 @@
 		4FE7648B18045F5A00D91AF3 /* ALMoviePlayerControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FE7648A18045F5A00D91AF3 /* ALMoviePlayerControllerTests.m */; };
 		4FE7649518045F9F00D91AF3 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FE7649418045F9F00D91AF3 /* QuartzCore.framework */; };
 		4FE7649718045FA600D91AF3 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4FE7649618045FA600D91AF3 /* MediaPlayer.framework */; };
-		4FE764A11804605200D91AF3 /* ALAirplayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FE7649A1804605200D91AF3 /* ALAirplayView.m */; };
 		4FE764A21804605200D91AF3 /* ALButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FE7649C1804605200D91AF3 /* ALButton.m */; };
 		4FE764A31804605200D91AF3 /* ALMoviePlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FE7649E1804605200D91AF3 /* ALMoviePlayerController.m */; };
 		4FE764A41804605200D91AF3 /* ALMoviePlayerControls.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FE764A01804605200D91AF3 /* ALMoviePlayerControls.m */; };
@@ -84,8 +83,6 @@
 		4FE7648A18045F5A00D91AF3 /* ALMoviePlayerControllerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ALMoviePlayerControllerTests.m; sourceTree = "<group>"; };
 		4FE7649418045F9F00D91AF3 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		4FE7649618045FA600D91AF3 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
-		4FE764991804605200D91AF3 /* ALAirplayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ALAirplayView.h; sourceTree = "<group>"; };
-		4FE7649A1804605200D91AF3 /* ALAirplayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ALAirplayView.m; sourceTree = "<group>"; };
 		4FE7649B1804605200D91AF3 /* ALButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ALButton.h; sourceTree = "<group>"; };
 		4FE7649C1804605200D91AF3 /* ALButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ALButton.m; sourceTree = "<group>"; };
 		4FE7649D1804605200D91AF3 /* ALMoviePlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ALMoviePlayerController.h; sourceTree = "<group>"; };
@@ -213,8 +210,6 @@
 				4FE7649E1804605200D91AF3 /* ALMoviePlayerController.m */,
 				4FE7649F1804605200D91AF3 /* ALMoviePlayerControls.h */,
 				4FE764A01804605200D91AF3 /* ALMoviePlayerControls.m */,
-				4FE764991804605200D91AF3 /* ALAirplayView.h */,
-				4FE7649A1804605200D91AF3 /* ALAirplayView.m */,
 				4FE7649B1804605200D91AF3 /* ALButton.h */,
 				4FE7649C1804605200D91AF3 /* ALButton.m */,
 				4FE764AB18046B1800D91AF3 /* Images */,
@@ -370,7 +365,6 @@
 				4FE7647618045F5A00D91AF3 /* AppDelegate.m in Sources */,
 				4FE7647218045F5A00D91AF3 /* main.m in Sources */,
 				4FE764A21804605200D91AF3 /* ALButton.m in Sources */,
-				4FE764A11804605200D91AF3 /* ALAirplayView.m in Sources */,
 				4FE764A41804605200D91AF3 /* ALMoviePlayerControls.m in Sources */,
 				4FE764A31804605200D91AF3 /* ALMoviePlayerController.m in Sources */,
 			);

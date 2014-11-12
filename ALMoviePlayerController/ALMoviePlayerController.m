@@ -55,12 +55,8 @@ static const NSTimeInterval fullscreenAnimationDuration = 0.3;
     return [self initWithFrame:CGRectZero];
 }
 
-- (id)initWithContentURL:(NSURL *)url {
-    [[NSException exceptionWithName:@"ALMoviePlayerController Exception" reason:@"Set contentURL after initialization." userInfo:nil] raise];
-    return nil;
-}
-
 - (id)initWithFrame:(CGRect)frame {
+
     if ( (self = [super init]) ) {
         
         self.view.frame = frame;
@@ -105,7 +101,9 @@ static const NSTimeInterval fullscreenAnimationDuration = 0.3;
     }
     [super setContentURL:contentURL];
     [[NSNotificationCenter defaultCenter] postNotificationName:ALMoviePlayerContentURLDidChangeNotification object:nil];
-    [self play];
+	if(self.shouldAutoplay) {
+		[self play];
+	}
 }
 
 - (void)setControls:(ALMoviePlayerControls *)controls {
@@ -142,20 +140,23 @@ static const NSTimeInterval fullscreenAnimationDuration = 0.3;
         } completion:^(BOOL finished) {
             self.view.alpha = 0.f;
             [self.movieBackgroundView addSubview:self.view];
+            
             UIInterfaceOrientation currentOrientation = [[UIApplication sharedApplication] statusBarOrientation];
             [self rotateMoviePlayerForOrientation:currentOrientation animated:NO completion:^{
                 [UIView animateWithDuration:animated ? fullscreenAnimationDuration : 0.0 delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
                     self.view.alpha = 1.f;
                 } completion:^(BOOL finished) {
                     [[NSNotificationCenter defaultCenter] postNotificationName:MPMoviePlayerDidEnterFullscreenNotification object:nil];
-                    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(statusBarOrientationWillChange:) name:UIApplicationWillChangeStatusBarOrientationNotification object:nil];
+     //               [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(statusBarOrientationWillChange:) name:UIApplicationWillChangeStatusBarOrientationNotification object:nil];
                 }];
             }];
         }];
         
     } else {
         [[NSNotificationCenter defaultCenter] postNotificationName:MPMoviePlayerWillExitFullscreenNotification object:nil];
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillChangeStatusBarOrientationNotification object:nil];
+        
+//        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillChangeStatusBarOrientationNotification object:nil];
+        
         [UIView animateWithDuration:animated ? fullscreenAnimationDuration : 0.0 delay:0.0 options:UIViewAnimationOptionCurveLinear animations:^{
             self.view.alpha = 0.f;
         } completion:^(BOOL finished) {
@@ -186,8 +187,9 @@ static const NSTimeInterval fullscreenAnimationDuration = 0.3;
 }
 
 - (void)statusBarOrientationWillChange:(NSNotification *)note {
-    UIInterfaceOrientation orientation = (UIInterfaceOrientation)[[[note userInfo] objectForKey:UIApplicationStatusBarOrientationUserInfoKey] integerValue];
-    [self rotateMoviePlayerForOrientation:orientation animated:YES completion:nil];
+    
+//    UIInterfaceOrientation orientation = (UIInterfaceOrientation)[[[note userInfo] objectForKey:UIApplicationStatusBarOrientationUserInfoKey] integerValue];
+//    [self rotateMoviePlayerForOrientation:orientation animated:YES completion:nil];
 }
 
 - (void)rotateMoviePlayerForOrientation:(UIInterfaceOrientation)orientation animated:(BOOL)animated completion:(void (^)(void))completion {

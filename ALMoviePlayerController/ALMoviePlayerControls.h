@@ -8,6 +8,14 @@
 
 #import <UIKit/UIKit.h>
 #import <MediaPlayer/MPMoviePlayerController.h>
+#import "ALButton.h"
+
+@protocol ALMoviePlayerControlsDelegate <NSObject>
+@optional
+- (void)didCancel;
+@required
+- (void)didChoose;
+@end
 
 @class ALMoviePlayerController;
 
@@ -73,6 +81,8 @@ typedef enum {
  */
 @property (nonatomic, assign) NSTimeInterval fadeDelay;
 
+@property (nonatomic, assign) BOOL neverHide;
+
 /**
  The rate at which the movie should fastforward or rewind.
  
@@ -91,6 +101,11 @@ typedef enum {
  Are the controls currently showing on screen?
  */
 @property (nonatomic, readonly, getter = isShowing) BOOL showing;
+
+
+
+@property (nonatomic, weak) id<ALMoviePlayerControlsDelegate> delegate;
+
 
 
 /** 

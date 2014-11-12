@@ -8,8 +8,6 @@
 
 #import "ALMoviePlayerControls.h"
 #import "ALMoviePlayerController.h"
-#import "ALAirplayView.h"
-#import "ALButton.h"
 #import <tgmath.h>
 #import <QuartzCore/QuartzCore.h>
 
@@ -32,13 +30,9 @@
 
 @end
 
-static const inline BOOL isIpad() {
-    return UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad;
-}
 static const CGFloat activityIndicatorSize = 40.f;
-static const CGFloat iPhoneScreenPortraitWidth = 320.f;
 
-@interface ALMoviePlayerControls () <ALAirplayViewDelegate, ALButtonDelegate> {
+@interface ALMoviePlayerControls () <ALButtonDelegate> {
     @private
     int windowSubviews;
 }
@@ -56,14 +50,12 @@ static const CGFloat iPhoneScreenPortraitWidth = 320.f;
 @property (nonatomic, strong) ALMoviePlayerControlsBar *bottomBar;
 @property (nonatomic, strong) UISlider *durationSlider;
 @property (nonatomic, strong) ALButton *playPauseButton;
-@property (nonatomic, strong) MPVolumeView *volumeView;
-@property (nonatomic, strong) ALAirplayView *airplayView;
-@property (nonatomic, strong) ALButton *fullscreenButton;
+
 @property (nonatomic, strong) UILabel *timeElapsedLabel;
 @property (nonatomic, strong) UILabel *timeRemainingLabel;
-@property (nonatomic, strong) ALButton *seekForwardButton;
-@property (nonatomic, strong) ALButton *seekBackwardButton;
-@property (nonatomic, strong) ALButton *scaleButton;
+
+@property (nonatomic, strong) ALButton *cancelButton;
+@property (nonatomic, strong) ALButton *chooseButton;
 
 @end
 
@@ -149,59 +141,36 @@ static const CGFloat iPhoneScreenPortraitWidth = 320.f;
     _timeRemainingLabel.layer.shadowOffset = CGSizeMake(1.f, 1.f);
     _timeRemainingLabel.layer.shadowOpacity = 0.8f;
     
-    if (_style == ALMoviePlayerControlsStyleFullscreen || (_style == ALMoviePlayerControlsStyleDefault && _moviePlayer.isFullscreen)) {
         [_topBar addSubview:_durationSlider];
         [_topBar addSubview:_timeElapsedLabel];
         [_topBar addSubview:_timeRemainingLabel];
-        
-        _fullscreenButton = [[ALButton alloc] init];
-        [_fullscreenButton setTitle:@"Done" forState:UIControlStateNormal];
-        [_fullscreenButton setTitleShadowColor:[UIColor blackColor] forState:UIControlStateNormal];
-        _fullscreenButton.titleLabel.shadowOffset = CGSizeMake(1.f, 1.f);
-        [_fullscreenButton.titleLabel setFont:[UIFont systemFontOfSize:14.f]];
-        _fullscreenButton.delegate = self;
-        [_fullscreenButton addTarget:self action:@selector(fullscreenPressed:) forControlEvents:UIControlEventTouchUpInside];
-        [_topBar addSubview:_fullscreenButton];
-        
-        _scaleButton = [[ALButton alloc] init];
-        _scaleButton.delegate = self;
-        [_scaleButton setImage:[UIImage imageNamed:@"movieFullscreen.png"] forState:UIControlStateNormal];
-        [_scaleButton setImage:[UIImage imageNamed:@"movieEndFullscreen.png"] forState:UIControlStateSelected];
-        [_scaleButton addTarget:self action:@selector(scalePressed:) forControlEvents:UIControlEventTouchUpInside];
-        [_topBar addSubview:_scaleButton];
-        
-        _volumeView = [[MPVolumeView alloc] init];
-        [_volumeView setShowsRouteButton:NO];
-        [_volumeView setShowsVolumeSlider:YES];
-        [_bottomBar addSubview:_volumeView];
-        
-        _seekForwardButton = [[ALButton alloc] init];
-        [_seekForwardButton setImage:[UIImage imageNamed:@"movieForward.png"] forState:UIControlStateNormal];
-        [_seekForwardButton setImage:[UIImage imageNamed:@"movieForwardSelected.png"] forState:UIControlStateSelected];
-        _seekForwardButton.delegate = self;
-        [_seekForwardButton addTarget:self action:@selector(seekForwardPressed:) forControlEvents:UIControlEventTouchUpInside];
-        [_bottomBar addSubview:_seekForwardButton];
-        
-        _seekBackwardButton = [[ALButton alloc] init];
-        [_seekBackwardButton setImage:[UIImage imageNamed:@"movieBackward.png"] forState:UIControlStateNormal];
-        [_seekBackwardButton setImage:[UIImage imageNamed:@"movieBackwardSelected.png"] forState:UIControlStateSelected];
-        _seekBackwardButton.delegate = self;
-        [_seekBackwardButton addTarget:self action:@selector(seekBackwardPressed:) forControlEvents:UIControlEventTouchUpInside];
-        [_bottomBar addSubview:_seekBackwardButton];
-    }
     
-    else if (_style == ALMoviePlayerControlsStyleEmbedded || (_style == ALMoviePlayerControlsStyleDefault && !_moviePlayer.isFullscreen)) {
-        [_bottomBar addSubview:_durationSlider];
-        [_bottomBar addSubview:_timeElapsedLabel];
-        [_bottomBar addSubview:_timeRemainingLabel];
-        
-        _fullscreenButton = [[ALButton alloc] init];
-        [_fullscreenButton setImage:[UIImage imageNamed:@"movieFullscreen.png"] forState:UIControlStateNormal];
-        [_fullscreenButton addTarget:self action:@selector(fullscreenPressed:) forControlEvents:UIControlEventTouchUpInside];
-        _fullscreenButton.delegate = self;
-        [_bottomBar addSubview:_fullscreenButton];
-    }
+  
+        //cancel button
+        _cancelButton = [[ALButton alloc] init];
+        [_cancelButton setTitle:@"Choose" forState:UIControlStateNormal];
+        _cancelButton.delegate = self;
+        _cancelButton.backgroundColor = [UIColor clearColor];
+        [_cancelButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_cancelButton addTarget:self action:@selector(choosePressed:) forControlEvents:UIControlEventTouchUpInside];
+
     
+        //use button
+        _chooseButton = [[ALButton alloc] init];
+        [_chooseButton setTitle:@"Cancel" forState:UIControlStateNormal];
+        _chooseButton.delegate = self;
+        _chooseButton.backgroundColor = [UIColor clearColor];
+        [_chooseButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        [_chooseButton addTarget:self action:@selector(cancelPressed:) forControlEvents:UIControlEventTouchUpInside];
+        
+
+
+        [_bottomBar addSubview:_cancelButton];
+        [_bottomBar addSubview:_chooseButton];
+        
+        
+
+        
     //static stuff
     _playPauseButton = [[ALButton alloc] init];
     [_playPauseButton setImage:[UIImage imageNamed:@"moviePause.png"] forState:UIControlStateNormal];
@@ -210,10 +179,6 @@ static const CGFloat iPhoneScreenPortraitWidth = 320.f;
     [_playPauseButton addTarget:self action:@selector(playPausePressed:) forControlEvents:UIControlEventTouchUpInside];
     _playPauseButton.delegate = self;
     [_bottomBar addSubview:_playPauseButton];
-    
-    _airplayView = [[ALAirplayView alloc] init];
-    _airplayView.delegate = self;
-    [_bottomBar addSubview:_airplayView];
     
     _activityBackgroundView = [[UIView alloc] init];
     [_activityBackgroundView setBackgroundColor:[UIColor blackColor]];
@@ -234,47 +199,12 @@ static const CGFloat iPhoneScreenPortraitWidth = 320.f;
 }
 
 - (void)nilDelegates {
-    _airplayView.delegate = nil;
     _playPauseButton.delegate = nil;
-    _fullscreenButton.delegate = nil;
-    _seekForwardButton.delegate = nil;
-    _seekBackwardButton.delegate = nil;
-    _scaleButton.delegate = nil;
+    _cancelButton.delegate = nil;
+    _chooseButton.delegate = nil;
 }
 
 # pragma mark - Setters
-
-- (void)setStyle:(ALMoviePlayerControlsStyle)style {
-    if (_style != style) {
-        BOOL flag = _style == ALMoviePlayerControlsStyleDefault;
-        [self hideControls:^{
-            [self resetViews];
-            _style = style;
-            [self setup];
-            if (_style != ALMoviePlayerControlsStyleNone) {
-                double delayInSeconds = 0.2;
-                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
-                dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-                    [self setDurationSliderMaxMinValues];
-                    [self monitorMoviePlayback]; //resume values
-                    [self startDurationTimer];
-                    [self showControls:^{
-                        if (flag) {
-                            //put style back to default
-                            _style = ALMoviePlayerControlsStyleDefault;
-                        }
-                    }];
-                    
-                });
-            } else {
-                if (flag) {
-                    //put style back to default
-                    _style = ALMoviePlayerControlsStyleDefault;
-                }
-            }
-        }];
-    }
-}
 
 - (void)setState:(ALMoviePlayerControlsState)state {
     if (_state != state) {
@@ -333,33 +263,6 @@ static const CGFloat iPhoneScreenPortraitWidth = 320.f;
     [self performSelector:@selector(hideControls:) withObject:nil afterDelay:self.fadeDelay];
 }
 
-- (void)airplayButtonTouchedDown {
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideControls:) object:nil];
-}
-
-- (void)airplayButtonTouchedUpOutside {
-    [self performSelector:@selector(hideControls:) withObject:nil afterDelay:self.fadeDelay];
-}
-
-- (void)airplayButtonTouchFailed {
-    [self performSelector:@selector(hideControls:) withObject:nil afterDelay:self.fadeDelay];
-}
-
-- (void)airplayButtonTouchedUpInside {
-    //TODO iphone
-    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideControls:) object:nil];
-    UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
-    if (!keyWindow) {
-        keyWindow = [[[UIApplication sharedApplication] windows] objectAtIndex:0];
-    }
-    if (isIpad()) {
-        windowSubviews = keyWindow.layer.sublayers.count;
-        [keyWindow addObserver:self forKeyPath:@"layer.sublayers" options:NSKeyValueObservingOptionNew context:NULL];
-    } else {
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeKey:) name:UIWindowDidBecomeKeyNotification object:nil];
-    }
-}
-
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if (![keyPath isEqualToString:@"layer.sublayers"]) {
         return;
@@ -374,82 +277,29 @@ static const CGFloat iPhoneScreenPortraitWidth = 320.f;
     }
 }
 
-- (void)windowDidResignKey:(NSNotification *)note {
-    UIWindow *resignedWindow = (UIWindow *)[note object];
-    if ([self isAirplayShowingInView:resignedWindow]) {
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIWindowDidResignKeyNotification object:nil];
-        [self performSelector:@selector(hideControls:) withObject:nil afterDelay:self.fadeDelay];
-    }
-}
-
-- (void)windowDidBecomeKey:(NSNotification *)note {
-    UIWindow *keyWindow = (UIWindow *)[note object];
-    if ([self isAirplayShowingInView:keyWindow]) {
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIWindowDidBecomeKeyNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidResignKey:) name:UIWindowDidResignKeyNotification object:nil];
-    }
-}
-
-- (BOOL)isAirplayShowingInView:(UIView *)view {
-    BOOL actionSheet = NO;
-    for (UIView *subview in view.subviews) {
-        if ([subview isKindOfClass:[UIActionSheet class]]) {
-            actionSheet = YES;
-        } else {
-            actionSheet = [self isAirplayShowingInView:subview];
-        }
-    }
-    return actionSheet;
-}
-
 - (void)playPausePressed:(UIButton *)button {
     self.moviePlayer.playbackState == MPMoviePlaybackStatePlaying ? [self.moviePlayer pause] : [self.moviePlayer play];
     [self performSelector:@selector(hideControls:) withObject:nil afterDelay:self.fadeDelay];
 }
 
-- (void)fullscreenPressed:(UIButton *)button {
-    if (self.style == ALMoviePlayerControlsStyleDefault) {
-        self.style = self.moviePlayer.isFullscreen ? ALMoviePlayerControlsStyleEmbedded : ALMoviePlayerControlsStyleFullscreen;
-    }
-    if (self.moviePlayer.currentPlaybackRate != 1.f) {
-        self.moviePlayer.currentPlaybackRate = 1.f;
-    }
-    [self.moviePlayer setFullscreen:!self.moviePlayer.isFullscreen animated:YES];
-    [self performSelector:@selector(hideControls:) withObject:nil afterDelay:self.fadeDelay];
-}
+- (void)choosePressed:(UIButton *)button {
 
-- (void)scalePressed:(UIButton *)button {
-    button.selected = !button.selected;
-    [self.moviePlayer setScalingMode:button.selected ? MPMovieScalingModeAspectFill : MPMovieScalingModeAspectFit];
-}
-
-- (void)seekForwardPressed:(UIButton *)button {
-    self.moviePlayer.currentPlaybackRate = !button.selected ? self.seekRate : 1.f;
-    button.selected = !button.selected;
-    self.seekBackwardButton.selected = NO;
-    if (!button.selected) {
-        [self performSelector:@selector(hideControls:) withObject:nil afterDelay:self.fadeDelay];
+    [self.moviePlayer pause];
+    
+    if ([self.delegate respondsToSelector:@selector(didChoose)]) {
+        [self.delegate didChoose];
     }
 }
 
-- (void)seekBackwardPressed:(UIButton *)button {
-    self.moviePlayer.currentPlaybackRate = !button.selected ? -self.seekRate : 1.f;
-    button.selected = !button.selected;
-    self.seekForwardButton.selected = NO;
-    if (!button.selected) {
-        [self performSelector:@selector(hideControls:) withObject:nil afterDelay:self.fadeDelay];
+
+
+- (void)cancelPressed:(UIButton *)button {
+
+    [self.moviePlayer pause];
+    
+    if ([self.delegate respondsToSelector:@selector(didCancel)]) {
+        [self.delegate didCancel];
     }
-}
-
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    if (self.style == ALMoviePlayerControlsStyleNone)
-        return;
-}
-
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    if (self.style == ALMoviePlayerControlsStyleNone)
-        return;
-    self.isShowing ? [self hideControls:nil] : [self showControls:nil];
 }
 
 # pragma mark - Notifications
@@ -467,7 +317,6 @@ static const CGFloat iPhoneScreenPortraitWidth = 320.f;
     [self.durationTimer invalidate];
     [self.moviePlayer setCurrentPlaybackTime:0.0];
     [self monitorMoviePlayback]; //reset values
-    [self hideControls:nil];
     self.state = ALMoviePlayerControlsStateIdle;
 }
 
@@ -562,7 +411,10 @@ static const CGFloat iPhoneScreenPortraitWidth = 320.f;
 }
 
 - (void)hideControls:(void(^)(void))completion {
-    if (self.isShowing) {
+    
+    self.neverHide = YES;
+    
+    if (self.isShowing && !self.neverHide) {
         [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideControls:) object:nil];
         [UIView animateWithDuration:0.3 delay:0.0 options:0 animations:^{
             if (self.style == ALMoviePlayerControlsStyleFullscreen || (self.style == ALMoviePlayerControlsStyleDefault && self.moviePlayer.isFullscreen)) {
@@ -633,75 +485,40 @@ static const CGFloat iPhoneScreenPortraitWidth = 320.f;
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-            
-    if (self.style == ALMoviePlayerControlsStyleNone)
-        return;
     
     //common sizes
-    CGFloat paddingFromBezel = self.frame.size.width <= iPhoneScreenPortraitWidth ? 10.f : 20.f;
-    CGFloat paddingBetweenButtons = self.frame.size.width <= iPhoneScreenPortraitWidth ? 10.f : 30.f;
-    CGFloat paddingBetweenPlaybackButtons = self.frame.size.width <= iPhoneScreenPortraitWidth ? 20.f : 30.f;
     CGFloat paddingBetweenLabelsAndSlider = 10.f;
     CGFloat sliderHeight = 34.f; //default height
-    CGFloat volumeHeight = 20.f;
-    CGFloat volumeWidth = isIpad() ? 210.f : 120.f;
-    CGFloat seekWidth = 36.f;
-    CGFloat seekHeight = 20.f;
-    CGFloat airplayWidth = 30.f;
-    CGFloat airplayHeight = 22.f;
-    CGFloat playWidth = 18.f;
-    CGFloat playHeight = 22.f;
+    
+    CGFloat seekWidth = 100.f;
+    CGFloat seekHeight = 50.f;
+    
+    CGFloat playWidth = 18.f*2;
+    CGFloat playHeight = 22.f*2;
+    
     CGFloat labelWidth = 30.f;
     
-    if (self.style == ALMoviePlayerControlsStyleFullscreen || (self.style == ALMoviePlayerControlsStyleDefault && self.moviePlayer.isFullscreen)) {
-        //top bar
-        CGFloat fullscreenWidth = 34.f;
-        CGFloat fullscreenHeight = self.barHeight;
-        CGFloat scaleWidth = 28.f;
-        CGFloat scaleHeight = 28.f;
-        self.topBar.frame = CGRectMake(0, 0, self.frame.size.width, self.barHeight);
-        self.fullscreenButton.frame = CGRectMake(paddingFromBezel, self.barHeight/2 - fullscreenHeight/2, fullscreenWidth, fullscreenHeight);
-        self.timeElapsedLabel.frame = CGRectMake(self.fullscreenButton.frame.origin.x + self.fullscreenButton.frame.size.width + paddingBetweenButtons, 0, labelWidth, self.barHeight);
-        self.scaleButton.frame = CGRectMake(self.topBar.frame.size.width - paddingFromBezel - scaleWidth, self.barHeight/2 - scaleHeight/2, scaleWidth, scaleHeight);
-        self.timeRemainingLabel.frame = CGRectMake(self.scaleButton.frame.origin.x - paddingBetweenButtons - labelWidth, 0, labelWidth, self.barHeight);
-        
-        //bottom bar
-        self.bottomBar.frame = CGRectMake(0, self.frame.size.height - self.barHeight, self.frame.size.width, self.barHeight);
-        self.playPauseButton.frame = CGRectMake(self.bottomBar.frame.size.width/2 - playWidth/2, self.barHeight/2 - playHeight/2, playWidth, playHeight);
-        self.seekForwardButton.frame = CGRectMake(self.playPauseButton.frame.origin.x + self.playPauseButton.frame.size.width + paddingBetweenPlaybackButtons, self.barHeight/2 - seekHeight/2 + 1.f, seekWidth, seekHeight);
-        self.seekBackwardButton.frame = CGRectMake(self.playPauseButton.frame.origin.x - paddingBetweenPlaybackButtons - seekWidth, self.barHeight/2 - seekHeight/2 + 1.f, seekWidth, seekHeight);
-        
-        //hide volume view in iPhone's portrait orientation
-        if (self.frame.size.width <= iPhoneScreenPortraitWidth) {
-            self.volumeView.alpha = 0.f;
-        } else {
-            self.volumeView.alpha = 1.f;
-            self.volumeView.frame = CGRectMake(paddingFromBezel, self.barHeight/2 - volumeHeight/2, volumeWidth, volumeHeight);
-        }
-        
-        self.airplayView.frame = CGRectMake(self.bottomBar.frame.size.width - paddingFromBezel - airplayWidth, self.barHeight/2 - airplayHeight/2, airplayWidth, airplayHeight);
-    }
+    //top bar
+    self.topBar.frame = CGRectMake(0, 0, self.frame.size.width, self.barHeight);
     
-    else if (self.style == ALMoviePlayerControlsStyleEmbedded || (self.style == ALMoviePlayerControlsStyleDefault && !self.moviePlayer.isFullscreen)) {
-        self.bottomBar.frame = CGRectMake(0, self.frame.size.height - self.barHeight, self.frame.size.width, self.barHeight);
-        
-        //left side of bottom bar
-        self.playPauseButton.frame = CGRectMake(paddingFromBezel, self.barHeight/2 - playHeight/2, playWidth, playHeight);
-        self.timeElapsedLabel.frame = CGRectMake(self.playPauseButton.frame.origin.x + self.playPauseButton.frame.size.width + paddingBetweenButtons, 0, labelWidth, self.barHeight);
-        
-        //right side of bottom bar
-        CGFloat fullscreenWidth = 28.f;
-        CGFloat fullscreenHeight = fullscreenWidth;
-        self.fullscreenButton.frame = CGRectMake(self.bottomBar.frame.size.width - paddingFromBezel - fullscreenWidth, self.barHeight/2 - fullscreenHeight/2, fullscreenWidth, fullscreenHeight);
-        self.airplayView.frame = CGRectMake(self.fullscreenButton.frame.origin.x - paddingBetweenButtons - airplayWidth, self.barHeight/2 - airplayHeight/2, airplayWidth, airplayHeight);
-        self.timeRemainingLabel.frame = CGRectMake(self.airplayView.frame.origin.x - paddingBetweenButtons - labelWidth, 0, labelWidth, self.barHeight);
-    }
+    //bottom bar
+    self.bottomBar.frame = CGRectMake(0, self.frame.size.height - self.barHeight, self.frame.size.width, self.barHeight);
+    self.playPauseButton.frame = CGRectMake(CGRectGetWidth(self.bottomBar.frame)/2 - playWidth/2, self.barHeight/2 - playHeight/2, playWidth, playHeight);
+    self.cancelButton.frame = CGRectMake(CGRectGetWidth(self.bottomBar.frame) - seekWidth, self.barHeight/2 - seekHeight/2 + 1.f, seekWidth, seekHeight);
+    self.chooseButton.frame = CGRectMake(0, self.barHeight/2 - seekHeight/2 + 1.f, seekWidth, seekHeight);
     
     //duration slider
+    self.timeElapsedLabel.frame = CGRectMake(10, 0, labelWidth, self.barHeight);
+    self.timeRemainingLabel.frame = CGRectMake(CGRectGetWidth(self.topBar.frame) - labelWidth - 10, 0, labelWidth, self.barHeight);
+    
     CGFloat timeRemainingX = self.timeRemainingLabel.frame.origin.x;
     CGFloat timeElapsedX = self.timeElapsedLabel.frame.origin.x;
     CGFloat sliderWidth = ((timeRemainingX - paddingBetweenLabelsAndSlider) - (timeElapsedX + self.timeElapsedLabel.frame.size.width + paddingBetweenLabelsAndSlider));
-    self.durationSlider.frame = CGRectMake(timeElapsedX + self.timeElapsedLabel.frame.size.width + paddingBetweenLabelsAndSlider, self.barHeight/2 - sliderHeight/2, sliderWidth, sliderHeight);
+
+    self.durationSlider.frame = CGRectMake(timeElapsedX + self.timeElapsedLabel.frame.size.width + paddingBetweenLabelsAndSlider,
+                                           self.barHeight/2 - sliderHeight/2,
+                                           sliderWidth,
+                                           sliderHeight);
     
     if (self.state == ALMoviePlayerControlsStateLoading) {
         [_activityBackgroundView setFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
