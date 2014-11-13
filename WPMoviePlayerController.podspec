@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 	s.name			= 'WPMoviePlayerController'
-	s.version		= '0.3.0'
+	s.version		= '0.4.0'
 	s.summary		= 'A drop-in replacement for MPMoviePlayerController that exposes the UI elements and allows for maximum customization.'
 	s.homepage		= 'https://github.com/cerupcat/WPMoviePlayerController'
 	s.author		= { 'Anthony Lobianco' => 'anthony@lobian.co' }
