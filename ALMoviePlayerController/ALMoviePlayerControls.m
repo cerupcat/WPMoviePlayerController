@@ -30,10 +30,8 @@
 
 @end
 
-static const CGFloat activityIndicatorSize = 40.f;
-
 @interface ALMoviePlayerControls () <ALButtonDelegate> {
-    @private
+@private
     int windowSubviews;
 }
 
@@ -43,7 +41,6 @@ static const CGFloat activityIndicatorSize = 40.f;
 
 @property (nonatomic, strong) NSTimer *durationTimer;
 
-@property (nonatomic, strong) UIView *activityBackgroundView;
 @property (nonatomic, strong) UIActivityIndicatorView *activityIndicator;
 
 @property (nonatomic, strong) ALMoviePlayerControlsBar *topBar;
@@ -98,7 +95,7 @@ static const CGFloat activityIndicatorSize = 40.f;
 - (void)setup {
     if (self.style == ALMoviePlayerControlsStyleNone)
         return;
-
+    
     //top bar
     _topBar = [[ALMoviePlayerControlsBar alloc] init];
     _topBar.color = _barColor;
@@ -108,7 +105,7 @@ static const CGFloat activityIndicatorSize = 40.f;
     //bottom bar
     _bottomBar = [[ALMoviePlayerControlsBar alloc] init];
     _bottomBar.color = _barColor;
-    _bottomBar.alpha = 0.f;
+    _bottomBar.alpha = 1.f;
     [self addSubview:_bottomBar];
     
     _durationSlider = [[UISlider alloc] init];
@@ -141,36 +138,29 @@ static const CGFloat activityIndicatorSize = 40.f;
     _timeRemainingLabel.layer.shadowOffset = CGSizeMake(1.f, 1.f);
     _timeRemainingLabel.layer.shadowOpacity = 0.8f;
     
-        [_topBar addSubview:_durationSlider];
-        [_topBar addSubview:_timeElapsedLabel];
-        [_topBar addSubview:_timeRemainingLabel];
+    [_topBar addSubview:_durationSlider];
+    [_topBar addSubview:_timeElapsedLabel];
+    [_topBar addSubview:_timeRemainingLabel];
     
-  
-        //cancel button
-        _cancelButton = [[ALButton alloc] init];
-        [_cancelButton setTitle:@"Choose" forState:UIControlStateNormal];
-        _cancelButton.delegate = self;
-        _cancelButton.backgroundColor = [UIColor clearColor];
-        [_cancelButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [_cancelButton addTarget:self action:@selector(choosePressed:) forControlEvents:UIControlEventTouchUpInside];
-
+    //cancel button
+    _cancelButton = [[ALButton alloc] init];
+    [_cancelButton setTitle:@"Choose" forState:UIControlStateNormal];
+    _cancelButton.delegate = self;
+    _cancelButton.backgroundColor = [UIColor clearColor];
+    [_cancelButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [_cancelButton addTarget:self action:@selector(choosePressed:) forControlEvents:UIControlEventTouchUpInside];
     
-        //use button
-        _chooseButton = [[ALButton alloc] init];
-        [_chooseButton setTitle:@"Cancel" forState:UIControlStateNormal];
-        _chooseButton.delegate = self;
-        _chooseButton.backgroundColor = [UIColor clearColor];
-        [_chooseButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [_chooseButton addTarget:self action:@selector(cancelPressed:) forControlEvents:UIControlEventTouchUpInside];
-        
-
-
-        [_bottomBar addSubview:_cancelButton];
-        [_bottomBar addSubview:_chooseButton];
-        
-        
-
-        
+    //use button
+    _chooseButton = [[ALButton alloc] init];
+    [_chooseButton setTitle:@"Cancel" forState:UIControlStateNormal];
+    _chooseButton.delegate = self;
+    _chooseButton.backgroundColor = [UIColor clearColor];
+    [_chooseButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [_chooseButton addTarget:self action:@selector(cancelPressed:) forControlEvents:UIControlEventTouchUpInside];
+    
+    [_bottomBar addSubview:_cancelButton];
+    [_bottomBar addSubview:_chooseButton];
+    
     //static stuff
     _playPauseButton = [[ALButton alloc] init];
     [_playPauseButton setImage:[UIImage imageNamed:@"moviePause.png"] forState:UIControlStateNormal];
@@ -180,10 +170,6 @@ static const CGFloat activityIndicatorSize = 40.f;
     _playPauseButton.delegate = self;
     [_bottomBar addSubview:_playPauseButton];
     
-    _activityBackgroundView = [[UIView alloc] init];
-    [_activityBackgroundView setBackgroundColor:[UIColor blackColor]];
-    _activityBackgroundView.alpha = 0.f;
-    
     _activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
     _activityIndicator.alpha = 0.f;
     _activityIndicator.hidesWhenStopped = YES;
@@ -192,7 +178,6 @@ static const CGFloat activityIndicatorSize = 40.f;
 - (void)resetViews {
     [self stopDurationTimer];
     [self nilDelegates];
-    [_activityBackgroundView removeFromSuperview];
     [_activityIndicator removeFromSuperview];
     [_topBar removeFromSuperview];
     [_bottomBar removeFromSuperview];
@@ -283,7 +268,7 @@ static const CGFloat activityIndicatorSize = 40.f;
 }
 
 - (void)choosePressed:(UIButton *)button {
-
+    
     [self.moviePlayer pause];
     
     if ([self.delegate respondsToSelector:@selector(didChoose)]) {
@@ -294,7 +279,7 @@ static const CGFloat activityIndicatorSize = 40.f;
 
 
 - (void)cancelPressed:(UIButton *)button {
-
+    
     [self.moviePlayer pause];
     
     if ([self.delegate respondsToSelector:@selector(didCancel)]) {
@@ -433,22 +418,18 @@ static const CGFloat activityIndicatorSize = 40.f;
 }
 
 - (void)showLoadingIndicators {
-    [self addSubview:_activityBackgroundView];
     [self addSubview:_activityIndicator];
     [_activityIndicator startAnimating];
     
     [UIView animateWithDuration:0.2f animations:^{
-        _activityBackgroundView.alpha = 1.f;
         _activityIndicator.alpha = 1.f;
     }];
 }
 
 - (void)hideLoadingIndicators {
     [UIView animateWithDuration:0.2f delay:0.0 options:0 animations:^{
-        self.activityBackgroundView.alpha = 0.0f;
         self.activityIndicator.alpha = 0.f;
     } completion:^(BOOL finished) {
-        [self.activityBackgroundView removeFromSuperview];
         [self.activityIndicator removeFromSuperview];
     }];
 }
@@ -514,15 +495,14 @@ static const CGFloat activityIndicatorSize = 40.f;
     CGFloat timeRemainingX = self.timeRemainingLabel.frame.origin.x;
     CGFloat timeElapsedX = self.timeElapsedLabel.frame.origin.x;
     CGFloat sliderWidth = ((timeRemainingX - paddingBetweenLabelsAndSlider) - (timeElapsedX + self.timeElapsedLabel.frame.size.width + paddingBetweenLabelsAndSlider));
-
+    
     self.durationSlider.frame = CGRectMake(timeElapsedX + self.timeElapsedLabel.frame.size.width + paddingBetweenLabelsAndSlider,
                                            self.barHeight/2 - sliderHeight/2,
                                            sliderWidth,
                                            sliderHeight);
     
     if (self.state == ALMoviePlayerControlsStateLoading) {
-        [_activityBackgroundView setFrame:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
-        [_activityIndicator setFrame:CGRectMake((self.frame.size.width / 2) - (activityIndicatorSize / 2), (self.frame.size.height / 2) - (activityIndicatorSize / 2), activityIndicatorSize, activityIndicatorSize)];
+        _activityIndicator.center = self.center;
     }
 }
 
